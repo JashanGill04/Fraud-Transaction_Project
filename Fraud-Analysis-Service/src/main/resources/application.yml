@@ -1,0 +1,33 @@
+server:
+  port: 9002
+
+spring:
+  application:
+    name: fraud-analysis-service
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat:
+        options:
+          model: llama3.2
+          temperature: 0.2
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: fraud-analysis-group
+
+logging:
+  level:
+    com.transaction.analysis: DEBUG
+    org.springframework.kafka: INFO
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:9000/eureka

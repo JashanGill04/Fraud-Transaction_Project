@@ -1,0 +1,45 @@
+server:
+  port: 9001
+
+spring:
+  application:
+    name: transaction-gateway-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/Transaction-Fraud-Detection-App
+    username: postgres
+    password: Jashan@04
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update   # dev only ? generates/updates tables from entities. Use 'validate' or migrations (Flyway/Liquibase) in production
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    com.transaction.gateway: DEBUG
+    org.springframework.kafka: INFO
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:9000/eureka
