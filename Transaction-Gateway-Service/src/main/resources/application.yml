@@ -5,10 +5,13 @@ spring:
   application:
     name: transaction-gateway-service
 
+  config:
+    import: optional:file:.env[.properties]
+
   datasource:
-    url: jdbc:postgresql://localhost:5432/Transaction-Fraud-Detection-App
-    username: postgres
-    password: Jashan@04
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:Transaction-Fraud-Detection-App}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
