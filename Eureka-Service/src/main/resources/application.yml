@@ -3,6 +3,7 @@ spring:
     name: eureka
 server:
   port: 9000
+#  eureka should not point to itself
 eureka:
   client:
     register-with-eureka: false

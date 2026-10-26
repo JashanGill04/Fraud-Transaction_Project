@@ -40,6 +40,7 @@ public class Transaction {
 
     @Column(nullable = false)
     private Instant timestamp;
+    private String riskReason;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

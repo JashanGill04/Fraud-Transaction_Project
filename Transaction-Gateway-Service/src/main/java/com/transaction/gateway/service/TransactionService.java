@@ -5,11 +5,14 @@ import com.transaction.gateway.dto.TransactionResponse;
 import com.transaction.gateway.entity.Transaction;
 import com.transaction.gateway.kafka.TransactionProducer;
 import com.transaction.gateway.kafka.event.TransactionCreatedEvent;
+import com.transaction.gateway.kafka.event.TransactionDecidedEvent;
 import com.transaction.gateway.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -64,17 +67,21 @@ public class TransactionService {
                 .build();
 
         // 3. Publish to Kafka
-        transactionProducer.publish(event);
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                transactionProducer.publish(event);
+            }
+        });
 
         // 4. Return response to caller
         return TransactionResponse.fromEntity(transaction);
     }
 
-    public List<Transaction> getTransactions(){
-       List<Transaction> li = transactionRepository.findAll();
-        return li;
+    public List<TransactionResponse> getTransactions() {
+        return transactionRepository.findAll().stream()
+                .map(TransactionResponse::fromEntity).toList();
     }
-
 
     private String maskCardNumber(String cardNumber) {
         // 4111111111111234 -> 4111-XXXX-XXXX-1234
@@ -94,4 +101,14 @@ public class TransactionService {
             throw new IllegalStateException("SHA-256 algorithm not available", e);
         }
     }
+
+    @Transactional
+    public void applyDecision(TransactionDecidedEvent event) {
+        transactionRepository.findById(event.getTransactionId()).ifPresentOrElse(txn -> {
+            txn.setStatus(Transaction.TransactionStatus.valueOf(event.getStatus()));
+            txn.setRiskReason(event.getReason());
+            transactionRepository.save(txn);
+        }, () -> log.warn("Decision received for unknown txnId={}", event.getTransactionId()));
+    }
+
 }

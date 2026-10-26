@@ -11,6 +11,10 @@ spring:
       server:
         webmvc:
           routes:
+            - id: analysis-service
+              uri: lb://FRAUD-ANALYSIS-SERVICE
+              predicates:
+                - Path=/api/analysis/**
             - id: transaction-service
               uri: lb://TRANSACTION-GATEWAY-SERVICE
               predicates:

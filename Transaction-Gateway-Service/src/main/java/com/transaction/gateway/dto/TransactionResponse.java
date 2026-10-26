@@ -1,4 +1,5 @@
 package com.transaction.gateway.dto;
+
 import com.transaction.gateway.entity.Transaction;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +21,8 @@ public class TransactionResponse {
     private String merchantId;
     private String status;
     private Instant timestamp;
+    private String currency;
+    private String riskReason;
 
     public static TransactionResponse fromEntity(Transaction txn) {
         return TransactionResponse.builder()
@@ -28,6 +31,8 @@ public class TransactionResponse {
                 .merchantId(txn.getMerchantId())
                 .status(txn.getStatus().name())
                 .timestamp(txn.getTimestamp())
+                .currency(txn.getCurrency())
+                .riskReason(txn.getRiskReason())
                 .build();
     }
 }

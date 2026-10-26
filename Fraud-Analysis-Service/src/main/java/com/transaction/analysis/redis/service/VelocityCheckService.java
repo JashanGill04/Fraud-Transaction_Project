@@ -17,22 +17,25 @@ public class VelocityCheckService {
     private static final int MAX_TRANSACTIONS = 3;
     private static final Duration WINDOW = Duration.ofSeconds(60);
 
+    /** What the velocity check saw, so the pipeline can explain its decision. */
+    public record Result(long count, int maxAllowed, long windowSeconds, boolean exceeded) {}
+
     /**
-     * Increments the transaction count for this card within the current time window.
-     * Returns true if this transaction exceeds the velocity threshold.
+     * Counts this transaction against the card's current time window.
      */
-    public boolean isVelocityExceeded(String cardNumberHash) {
+    public Result check(String cardNumberHash) {
         String key = "velocity:" + cardNumberHash;
 
         Long count = redisTemplate.opsForValue().increment(key);
 
         if (count != null && count == 1) {
-            // first transaction in this window — set the expiry
+            // first transaction in this window: start the expiry clock
             redisTemplate.expire(key, WINDOW);
         }
 
-        log.debug("Velocity check for card hash={}, count={} in current window", cardNumberHash, count);
+        long c = count == null ? 0 : count;
+        log.debug("Velocity check for card hash={}, count={} in current window", cardNumberHash, c);
 
-        return count != null && count > MAX_TRANSACTIONS;
+        return new Result(c, MAX_TRANSACTIONS, WINDOW.toSeconds(), c > MAX_TRANSACTIONS);
     }
 }

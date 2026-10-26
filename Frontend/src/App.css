@@ -167,6 +167,10 @@
   color: var(--text);
   font-size: 14px;
   transition: border-color 0.15s ease;
+
+  /* Add these two lines */
+  width: 100%;
+  min-width: 0;
 }
 
 .field input::placeholder {
@@ -268,6 +272,9 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 13.5px;
+
+  /* Add this to enforce the 100% width constraint */
+  table-layout: fixed;
 }
 
 .ledger-table thead th {
@@ -284,6 +291,9 @@
   border-bottom: 1px solid var(--border);
   color: var(--text);
   vertical-align: middle;
+
+  /* Add this to allow long trace text to wrap onto new lines */
+  overflow-wrap: break-word;
 }
 
 .ledger-table tbody tr:last-child td {
